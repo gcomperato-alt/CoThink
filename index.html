@@ -171,6 +171,7 @@
 
       <div class="actions">
         <button class="main" id="refineBtn">Refine for AI</button>
+        <button class="main" id="useBtn">Use with AI</button>
         <button class="secondary" id="copyBtn">Copy result</button>
         <button class="secondary" id="clearBtn">Clear</button>
       </div>
@@ -192,6 +193,7 @@
     const userInput = document.getElementById('userInput');
     const outputBox = document.getElementById('outputBox');
     const refineBtn = document.getElementById('refineBtn');
+    const useBtn = document.getElementById('useBtn');
     const copyBtn = document.getElementById('copyBtn');
     const clearBtn = document.getElementById('clearBtn');
     const statusText = document.getElementById('status');
@@ -207,40 +209,6 @@
       });
     });
 
-    function buildRefinedPrompt(text, mode) {
-      const cleaned = text.trim();
-
-      const modeInstructions = {
-        general:
-          "Improve the following input for ChatGPT. Make it clearer, more specific, and easier to answer. Preserve the user's original intent. Keep it concise and practical.",
-
-        answer:
-          "Turn the following into a clear question for ChatGPT. The goal is to get a direct, useful answer. Preserve the user's intent and add only necessary context.",
-
-        explain:
-          "Turn the following into a prompt asking ChatGPT to explain the topic clearly. Ask for simple structure, examples, and no unnecessary jargon.",
-
-        rewrite:
-          "Turn the following into a rewrite request for ChatGPT. Specify tone, clarity, and purpose where useful. Preserve the original meaning.",
-
-        plan:
-          "Turn the following into a prompt asking ChatGPT for a practical step-by-step plan. Ask for clear priorities and realistic next actions.",
-
-        code:
-          "Turn the following into a clear coding request for ChatGPT. Include the goal, expected behavior, relevant constraints, and ask for usable code with explanations only where needed.",
-
-        question:
-          "Improve the following into a sharper question. If the original input is vague, make the missing assumptions explicit and ask ChatGPT to clarify them."
-      };
-
-      return `${modeInstructions[mode]}
-
-Original input:
-"${cleaned}"
-
-Return only the improved prompt.`;
-    }
-
     refineBtn.addEventListener('click', async () => {
       const text = userInput.value.trim();
 
@@ -250,48 +218,63 @@ Return only the improved prompt.`;
         return;
       }
 
-      
-      
-      statusText.textContent = "CoThink is refining...";
-outputBox.textContent = "Thinking...";
+      statusText.textContent = 'CoThink is refining...';
+      outputBox.textContent = 'Thinking...';
 
-try {
-  const response = await fetch("/api/refine", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      text,
-      mode: currentMode
-    })
-  });
+      try {
+        const response = await fetch('/api/refine', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            text,
+            mode: currentMode
+          })
+        });
 
-  const data = await response.json();
+        const data = await response.json();
 
-  if (!response.ok) {
-    throw new Error(data.error || "Request failed");
-  }
+        if (!response.ok) {
+          throw new Error(data.error || 'Request failed');
+        }
 
-  outputBox.textContent = data.refined;
-  statusText.textContent = "Refined. Copy it into ChatGPT.";
-} catch (error) {
-  outputBox.textContent = "Something went wrong. Please try again.";
-  statusText.textContent = error.message;
-}
+        outputBox.textContent = data.refined;
+        statusText.textContent = 'Refined. You’re good to go.';
+      } catch (error) {
+        outputBox.textContent = 'Something went wrong. Please try again.';
+        statusText.textContent = error.message;
+      }
+    });
+
+    useBtn.addEventListener('click', async () => {
+      const result = outputBox.textContent.trim();
+
+      if (!result || result === 'Your refined prompt will appear here.' || result === 'Thinking...') {
+        statusText.textContent = 'Nothing ready yet.';
+        return;
+      }
+
+      try {
+        await navigator.clipboard.writeText(result);
+        statusText.textContent = 'Copied. Opening ChatGPT...';
+        window.open('https://chat.openai.com', '_blank');
+      } catch (error) {
+        statusText.textContent = 'Copy failed. Please copy manually.';
+      }
     });
 
     copyBtn.addEventListener('click', async () => {
       const result = outputBox.textContent.trim();
 
-      if (!result || result === 'Your refined prompt will appear here.') {
+      if (!result || result === 'Your refined prompt will appear here.' || result === 'Thinking...') {
         statusText.textContent = 'Nothing to copy yet.';
         return;
       }
 
       try {
         await navigator.clipboard.writeText(result);
-        statusText.textContent = 'Copied.';
+        statusText.textContent = 'Copied. You’re good to go.';
       } catch (error) {
         statusText.textContent = 'Copy failed. Select the text manually.';
       }
