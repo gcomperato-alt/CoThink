@@ -4,288 +4,539 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CoThink - Refine Your Input for AI</title>
+  <link href="https://fonts.googleapis.com" rel="preconnect" />
+  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet" />
 
   <style>
+    :root {
+      --line: #1d1d22;
+      --blue1: #242b9b;
+      --blue2: #3e47d7;
+      --blue3: #5d65ff;
+      --cream: #fff7df;
+      --panel: #f3ead7;
+      --panel2: #fffaf0;
+      --shadow: rgba(0,0,0,.42);
+      --yellow: #fff4a8;
+      --yellow2: #ffe88a;
+      --red: #e43a32;
+      --cyan: #bdf2ff;
+      --ink: #111;
+    }
+
     * { box-sizing: border-box; }
+
+    html, body { min-height: 100%; }
 
     body {
       margin: 0;
       font-family: Arial, sans-serif;
-      background: #f6f4ef;
-      color: #1f1f1f;
+      color: var(--cream);
+      background-color: #1b130d;
+      background-image:
+        radial-gradient(circle at 18% 24%, rgba(255,232,138,.13), transparent 34%),
+        radial-gradient(circle at 80% 72%, rgba(0,0,0,.58), transparent 42%),
+        url('Background.png');
+      background-position: center, center, center;
+      background-size: cover, cover, cover;
+      background-repeat: no-repeat, no-repeat, no-repeat;
+      background-attachment: fixed, fixed, fixed;
+      overflow-x: hidden;
     }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: -1;
+      background:
+        linear-gradient(90deg, rgba(0,0,0,.52), transparent 16%, transparent 84%, rgba(0,0,0,.52)),
+        linear-gradient(180deg, rgba(0,0,0,.30), transparent 18%, transparent 72%, rgba(0,0,0,.55)),
+        radial-gradient(circle at 50% 48%, transparent 0 44%, rgba(0,0,0,.24) 72%);
+    }
+
+    .pixel { font-family: 'Press Start 2P', monospace; letter-spacing: .2px; }
+    .terminal { font-family: 'VT323', monospace; }
 
     .page {
       min-height: 100vh;
-      padding: 28px 18px 40px;
+      padding: 0 14px 42px;
+      background: rgba(0,0,0,.10);
+    }
+
+    .window-shell {
+      border: 2px solid var(--line);
+      min-height: 100vh;
+      box-shadow: inset 1px 1px 0 rgba(255,255,255,.35), inset -1px -1px 0 rgba(0,0,0,.55);
+    }
+
+    .topbar {
+      min-height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 5px 8px;
+      border-bottom: 2px solid var(--line);
+      background: linear-gradient(90deg, var(--blue1), var(--blue2) 58%, var(--blue3));
+      color: var(--yellow);
+      text-shadow: 2px 2px 0 #000;
+      font-size: 12px;
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .tiny-icon {
+      width: 18px;
+      height: 18px;
+      border: 2px solid #151515;
+      background:
+        linear-gradient(90deg, #ef3b1f 0 50%, #fff 50%),
+        #fff;
+      box-shadow: inset 0 0 0 2px #f4e9d1;
+      flex: 0 0 auto;
+    }
+
+    .winbtns { display: flex; gap: 3px; flex: 0 0 auto; }
+    .winbtn {
+      width: 28px;
+      height: 26px;
+      display: grid;
+      place-items: center;
+      border: 2px solid #101015;
+      background: linear-gradient(#fffef7, #c9c1b1);
+      color: #151515;
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+      box-shadow: inset 1px 1px 0 #fff, inset -1px -1px 0 #777;
+    }
+    .winbtn.close { background: linear-gradient(#ff856f, #d23128); color: #fff; }
+
+    .nav {
+      min-height: 58px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 10px 18px;
+      border-bottom: 2px solid var(--line);
+      background: rgba(245,238,222,.82);
+      color: #111;
+      font-size: 10px;
+      box-shadow: 0 3px 0 rgba(0,0,0,.35);
+    }
+
+    .nav-left {
+      display: flex;
+      align-items: center;
+      gap: 26px;
+      flex-wrap: wrap;
+    }
+
+    .nav-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+    }
+
+    .nav-icon {
+      width: 18px;
+      height: 18px;
+      display: inline-grid;
+      place-items: center;
+      font-size: 14px;
+    }
+
+    .mode-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border: 2px solid var(--line);
+      background: linear-gradient(#fffdf3, #d8cfbd);
+      box-shadow: inset 1px 1px 0 #fff, inset -1px -1px 0 #888;
+      white-space: nowrap;
     }
 
     .wrap {
       width: 100%;
       max-width: 1180px;
       margin: 0 auto;
+      padding-top: 28px;
     }
 
     .brand {
-      display: flex;
+      display: grid;
+      grid-template-columns: 150px minmax(0, 1fr);
+      gap: 22px;
       align-items: center;
-      gap: 14px;
-      margin-bottom: 22px;
+      margin: 8px auto 24px;
+      max-width: 980px;
+      padding: 16px 18px;
+      background: rgba(0,0,0,.38);
+      border: 2px solid rgba(255,244,168,.28);
+      box-shadow: 6px 6px 0 rgba(0,0,0,.32);
+      backdrop-filter: blur(1px);
     }
 
-.brand img {
-  width: 150px;
-  height: auto;
-  border-radius: 22px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.12);
-}
+    .brand img {
+      width: 150px;
+      height: auto;
+      border: 2px solid var(--line);
+      border-radius: 0;
+      background: #111;
+      box-shadow: 4px 4px 0 rgba(0,0,0,.45);
+      image-rendering: auto;
+    }
+
     .brand-text h1 {
       margin: 0;
-      font-size: 52px;
-      letter-spacing: -2px;
+      font-family: 'Press Start 2P', monospace;
+      color: var(--yellow);
+      text-shadow: 3px 3px 0 #000, 0 0 8px rgba(0,0,0,.85);
+      font-size: clamp(28px, 5vw, 54px);
+      line-height: 1.22;
+      letter-spacing: -1px;
     }
 
-    .brand-text .co {
-      color: #ef3b1f;
-    }
+    .brand-text .co { color: var(--red); }
 
     .subtitle {
-      margin: 4px 0 0;
-      font-size: 17px;
-      color: #3f3a35;
+      margin: 12px 0 0;
+      font-family: 'VT323', monospace;
+      font-size: 25px;
+      line-height: 1.12;
+      color: #fff8e7;
+      text-shadow: 2px 2px 0 #000, 0 0 5px #000;
     }
 
     .card {
       width: 100%;
-      background: #fffaf0;
-      border: 1px solid #e0d8c8;
-      border-radius: 24px;
-      padding: 28px;
-      box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+      background: var(--panel);
+      border: 2px solid var(--line);
+      box-shadow: 7px 7px 0 rgba(0,0,0,.42), inset 1px 1px 0 #fff, inset -1px -1px 0 #9a927f;
+      color: #141414;
+      overflow: hidden;
+    }
+
+    .card-titlebar {
+      min-height: 34px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 0 9px;
+      border-bottom: 2px solid var(--line);
+      background: linear-gradient(90deg, var(--blue1), var(--blue2) 58%, var(--blue3));
+      color: var(--yellow);
+      text-shadow: 2px 2px 0 #000;
+      font-size: 10px;
+    }
+
+    .mini-x {
+      width: 20px;
+      height: 20px;
+      display: grid;
+      place-items: center;
+      border: 2px solid var(--line);
+      background: linear-gradient(#fffdf5, #cfc6b4);
+      color: #333;
+      text-shadow: none;
+      font-family: Arial, sans-serif;
+      font-size: 13px;
     }
 
     .content-grid {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) 310px;
-      gap: 28px;
-      align-items: end;
+      grid-template-columns: minmax(0, 1fr) 320px;
+      gap: 24px;
+      align-items: stretch;
+      padding: 24px;
     }
 
     label {
       display: block;
       margin: 18px 0 8px;
-      font-weight: bold;
-      font-size: 22px;
+      color: #101010;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 10px;
+      line-height: 1.5;
     }
 
     textarea {
       width: 100%;
-      min-height: 145px;
+      min-height: 150px;
       resize: vertical;
-      border-radius: 16px;
-      border: 1px solid #ccc3b4;
+      border: 2px solid var(--line);
+      border-radius: 0;
       padding: 16px;
-      font-size: 18px;
-      line-height: 1.5;
-      background: #ffffff;
+      background: #fffdf8;
       color: #222;
+      font-family: 'VT323', monospace;
+      font-size: 24px;
+      line-height: 1.16;
+      box-shadow: inset 2px 2px 0 rgba(0,0,0,.16), inset -1px -1px 0 #fff;
     }
 
     textarea:focus {
-      outline: 2px solid #222;
-      border-color: #222;
+      outline: 3px solid var(--yellow2);
+      outline-offset: 2px;
+      border-color: #111;
     }
 
     .modes, .actions {
       display: flex;
       flex-wrap: wrap;
-      gap: 12px;
+      gap: 10px;
       margin: 10px 0 18px;
     }
 
-    .mode-btn {
-      border: 1px solid #d9cfc3;
-      background: #fff;
-      border-radius: 14px;
-      padding: 13px 20px;
+    button {
+      font-family: 'Press Start 2P', monospace;
+    }
+
+    .mode-btn,
+    button.main,
+    button.accent,
+    button.secondary {
+      border: 2px solid var(--line);
+      border-radius: 0;
+      padding: 11px 12px;
       cursor: pointer;
-      font-size: 17px;
+      font-size: 9px;
+      line-height: 1.35;
+      background: linear-gradient(#fffdf8, #d8cfbd);
+      color: #111;
+      box-shadow: inset 1px 1px 0 #fff, inset -1px -1px 0 #8d8574, 2px 2px 0 rgba(0,0,0,.20);
     }
 
-    .mode-btn.active {
-      background: #1f2329;
-      color: #fff;
-      border-color: #1f2329;
-    }
-
-    button.main, button.accent, button.secondary {
-      border-radius: 14px;
-      padding: 14px 20px;
-      font-size: 18px;
-      cursor: pointer;
-      border: none;
-      font-weight: bold;
-    }
-
+    .mode-btn.active,
     button.main {
-      background: #1f2329;
-      color: white;
+      background: linear-gradient(90deg, var(--blue1), var(--blue3));
+      color: var(--yellow);
+      text-shadow: 2px 2px 0 #000;
     }
 
     button.accent {
-      background: #ef3b1f;
-      color: white;
+      background: linear-gradient(#ff705f, #cf302b);
+      color: #fff8e7;
+      text-shadow: 2px 2px 0 #000;
     }
 
-    button.secondary {
-      background: #ffffff;
-      color: #1f1f1f;
-      border: 1px solid #d9cfc3;
-      font-weight: normal;
-    }
+    button.secondary { background: linear-gradient(#fffdf8, #ddd4c3); }
 
-    button:hover { opacity: 0.9; }
+    button:hover { filter: brightness(1.04); transform: translateY(-1px); }
+    button:active { transform: translate(1px,1px); box-shadow: inset 1px 1px 0 #fff, inset -1px -1px 0 #8d8574, 1px 1px 0 rgba(0,0,0,.2); }
 
     .status {
-      margin-top: 12px;
-      font-size: 18px;
-      color: #287a3e;
+      margin: 12px 0 2px;
+      min-height: 24px;
+      font-family: 'VT323', monospace;
+      font-size: 23px;
+      color: #114b22;
     }
 
     .output-box {
       margin-top: 12px;
       background: #fffdf8;
-      border: 1px solid #d8cfbf;
-      border-radius: 18px;
-      padding: 20px;
-      min-height: 140px;
+      border: 2px solid var(--line);
+      border-radius: 0;
+      padding: 18px;
+      min-height: 145px;
       white-space: pre-wrap;
-      line-height: 1.55;
-      font-size: 18px;
+      line-height: 1.3;
+      font-family: 'VT323', monospace;
+      font-size: 24px;
+      color: #1f1f1f;
+      box-shadow: inset 2px 2px 0 rgba(0,0,0,.12), inset -1px -1px 0 #fff;
     }
 
     .paste-card {
-      background: #f7fbf2;
-      border: 1px solid #d2dfc8;
-      border-radius: 18px;
-      padding: 24px;
+      background: #fff7df;
+      border: 2px solid var(--line);
+      padding: 22px;
       text-align: center;
-      color: #1f2329;
+      color: #151515;
+      box-shadow: inset 1px 1px 0 #fff, inset -1px -1px 0 #a89f8e;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
 
     .paste-card h2 {
-      margin: 0 0 10px;
-      font-size: 24px;
+      margin: 0 0 14px;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 13px;
+      line-height: 1.6;
+      color: var(--red);
+      text-shadow: 1px 1px 0 #000;
     }
 
     .paste-card p {
       margin: 8px 0;
-      font-size: 17px;
+      font-family: 'VT323', monospace;
+      font-size: 23px;
+      line-height: 1.15;
     }
 
     .shortcut {
       display: flex;
       justify-content: center;
       align-items: center;
-      gap: 14px;
-      margin: 18px 0;
-      font-size: 26px;
-      font-weight: bold;
+      gap: 12px;
+      margin: 20px 0;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 16px;
+      color: #111;
     }
 
     .key {
-      background: white;
-      border: 1px solid #d8cfbf;
-      border-radius: 12px;
-      padding: 14px 22px;
-      box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+      background: linear-gradient(#fffdf8, #d9d0bd);
+      border: 2px solid var(--line);
+      padding: 13px 18px;
+      box-shadow: inset 1px 1px 0 #fff, inset -1px -1px 0 #807768, 3px 3px 0 rgba(0,0,0,.25);
     }
 
     .small {
-      margin-top: 18px;
-      font-size: 15px;
-      color: #70695f;
+      margin: 18px 0 0;
+      padding: 10px 12px;
+      border: 2px dashed rgba(0,0,0,.35);
+      background: rgba(255,255,255,.36);
+      font-family: 'VT323', monospace;
+      font-size: 22px;
+      line-height: 1.16;
+      color: #222;
     }
 
-    @media (max-width: 850px) {
-      .content-grid {
-        grid-template-columns: 1fr;
-      }
+    .footer-note {
+      max-width: 980px;
+      margin: 22px auto 0;
+      padding: 10px 14px;
+      background: rgba(0,0,0,.48);
+      border: 2px solid rgba(255,244,168,.25);
+      color: var(--yellow);
+      text-shadow: 2px 2px 0 #000;
+      font-size: 10px;
+      line-height: 1.7;
+      text-align: center;
+    }
 
-      .brand-text h1 {
-        font-size: 42px;
-      }
+    @media (max-width: 900px) {
+      .content-grid { grid-template-columns: 1fr; }
+      .brand { grid-template-columns: 100px minmax(0, 1fr); }
+      .brand img { width: 100px; }
+      .nav { align-items: flex-start; flex-direction: column; }
+      .content-grid { padding: 16px; }
+    }
 
-      .brand img {
-  width: 90px;
-  height: 72px;
-}
+    @media (max-width: 620px) {
+      .page { padding: 0 8px 28px; }
+      .topbar { font-size: 9px; }
+      .brand { grid-template-columns: 1fr; text-align: center; justify-items: center; }
+      .brand-text h1 { font-size: 34px; }
+      .subtitle { font-size: 22px; }
+      .mode-chip { width: 100%; justify-content: center; }
+      .nav-left { gap: 14px; }
     }
   </style>
 </head>
 
 <body>
   <main class="page">
-    <div class="wrap">
-
-      <header class="brand">
-        <img src="cothink-logo.png" alt="CoThink logo" />
-        <div class="brand-text">
-          <h1><span class="co">Co</span>Think</h1>
-          <p class="subtitle">Messy thought in. Clear AI-ready prompt out.</p>
+    <div class="window-shell">
+      <div class="topbar pixel">
+        <div class="topbar-left">
+          <span class="tiny-icon" aria-hidden="true"></span>
+          <span>COTHINK - REFINE YOUR INPUT FOR AI</span>
         </div>
-      </header>
+        <div class="winbtns" aria-hidden="true">
+          <div class="winbtn">_</div>
+          <div class="winbtn">□</div>
+          <div class="winbtn close">×</div>
+        </div>
+      </div>
 
-      <section class="card">
-        <div class="content-grid">
-          <div>
-            <label for="userInput">Your rough input</label>
-            <textarea id="userInput" placeholder="Type your messy thought here..."></textarea>
+      <nav class="nav pixel">
+        <div class="nav-left">
+          <span class="nav-item"><span class="nav-icon">🏠</span> HOME</span>
+          <span class="nav-item"><span class="nav-icon">🗂️</span> MODES</span>
+          <span class="nav-item"><span class="nav-icon">⭐</span> EXAMPLES</span>
+          <span class="nav-item"><span class="nav-icon">🧠</span> COTHINK</span>
+        </div>
+        <div class="mode-chip">AI MODE: ON ▾</div>
+      </nav>
 
-            <label>What do you want the AI to do?</label>
-            <div class="modes">
-              <button class="mode-btn active" data-mode="general">General</button>
-              <button class="mode-btn" data-mode="answer">Answer</button>
-              <button class="mode-btn" data-mode="explain">Explain</button>
-              <button class="mode-btn" data-mode="rewrite">Rewrite</button>
-              <button class="mode-btn" data-mode="plan">Plan</button>
-              <button class="mode-btn" data-mode="code">Code</button>
-              <button class="mode-btn" data-mode="question">Ask better question</button>
-            </div>
+      <div class="wrap">
+        <header class="brand">
+          <img src="cothink-logo.png" alt="CoThink logo" />
+          <div class="brand-text">
+            <h1><span class="co">Co</span>Think</h1>
+            <p class="subtitle">Messy thought in. Clear AI-ready prompt out.</p>
+          </div>
+        </header>
 
-            <div class="actions">
-              <button class="main" id="refineBtn">✨ Refine for AI</button>
-              <button class="accent" id="useBtn">↗ Use with AI</button>
-              <button class="secondary" id="copyBtn">Copy result</button>
-              <button class="secondary" id="clearBtn">Clear</button>
-            </div>
-
-            <div class="status" id="status"></div>
-
-            <label>Your input, refined for better AI results</label>
-            <div class="output-box" id="outputBox">
-              Your refined prompt will appear here.
-            </div>
-
-            <p class="small">
-              CoThink does not answer for you. It helps you ask better, so the AI answers better.
-            </p>
+        <section class="card">
+          <div class="card-titlebar pixel">
+            <span>★ PROMPT REFINERY</span>
+            <span class="mini-x">×</span>
           </div>
 
-          <aside class="paste-card">
-            <h2>Don’t forget to paste!</h2>
-            <p>Use the keyboard shortcut:</p>
+          <div class="content-grid">
+            <div>
+              <label for="userInput">YOUR ROUGH INPUT</label>
+              <textarea id="userInput" placeholder="Type your messy thought here..."></textarea>
 
-            <div class="shortcut">
-              <span class="key">Ctrl</span>
-              <span>+</span>
-              <span class="key">V</span>
+              <label>WHAT DO YOU WANT THE AI TO DO?</label>
+              <div class="modes">
+                <button class="mode-btn active" data-mode="general">GENERAL</button>
+                <button class="mode-btn" data-mode="answer">ANSWER</button>
+                <button class="mode-btn" data-mode="explain">EXPLAIN</button>
+                <button class="mode-btn" data-mode="rewrite">REWRITE</button>
+                <button class="mode-btn" data-mode="plan">PLAN</button>
+                <button class="mode-btn" data-mode="code">CODE</button>
+                <button class="mode-btn" data-mode="question">ASK BETTER QUESTION</button>
+              </div>
+
+              <div class="actions">
+                <button class="main" id="refineBtn">REFINE FOR AI</button>
+                <button class="accent" id="useBtn">USE WITH AI</button>
+                <button class="secondary" id="copyBtn">COPY RESULT</button>
+                <button class="secondary" id="clearBtn">CLEAR</button>
+              </div>
+
+              <div class="status" id="status"></div>
+
+              <label>YOUR INPUT, REFINED FOR BETTER AI RESULTS</label>
+              <div class="output-box" id="outputBox">Your refined prompt will appear here.</div>
+
+              <p class="small">CoThink does not answer for you. It helps you ask better, so the AI answers better.</p>
             </div>
 
-            <p>Paste the refined prompt into your AI chat.</p>
-          </aside>
-        </div>
-      </section>
+            <aside class="paste-card">
+              <h2>DON'T FORGET TO PASTE!</h2>
+              <p>Use the keyboard shortcut:</p>
+
+              <div class="shortcut">
+                <span class="key">Ctrl</span>
+                <span>+</span>
+                <span class="key">V</span>
+              </div>
+
+              <p>Paste the refined prompt into your AI chat.</p>
+            </aside>
+          </div>
+        </section>
+
+        <div class="footer-note pixel">COTHINK CLEANS THE QUESTION BEFORE THE ANSWER MACHINE STARTS.</div>
+      </div>
     </div>
   </main>
 
@@ -338,7 +589,7 @@
         }
 
         outputBox.textContent = data.refined;
-        statusText.textContent = '✓ Refined. You’re good to go.';
+        statusText.textContent = 'Refined. You are good to go.';
       } catch (error) {
         outputBox.textContent = 'Something went wrong. Please try again.';
         statusText.textContent = error.message;
